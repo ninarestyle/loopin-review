@@ -1,34 +1,35 @@
 {
   "manifest_version": 3,
-
-  "name": "Chrome Extension TypeScript Starter",
-  "description": "Chrome Extension, TypeScript, Visual Studio Code",
+  "name": "Loopin Fashion Community Insights",
+  "description": "Tap into a knowledgeable fashion community with Loopin to ask questions, receive advice, and get detailed reviews on luxury fashion and designer brands.",
   "version": "1.0",
-
   "options_ui": {
     "page": "options.html"
   },
-
   "action": {
     "default_icon": "icon.png",
     "default_popup": "popup.html"
   },
-
-  "content_scripts": [
-      {
-          "matches": ["<all_urls>"],
-          "js": ["js/vendor.js", "js/content_script.js"]
-      }
-  ],
-
   "background": {
     "service_worker": "js/background.js"
   },
-
-  "permissions": [
-    "storage"
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "js/vendor.js",
+        "js/content_script.js"
+      ]
+    }
   ],
-
+  "permissions": [
+    "activeTab",
+    "tabs",
+    "storage",
+    "identity"
+  ],
   "host_permissions": [
     "<all_urls>"
   ]
