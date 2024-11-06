@@ -19,31 +19,40 @@ const LoginModal: React.FC<LoginModalProps> = ({ onClose }) => (
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.4)'
+    backgroundColor: 'rgba(0, 0, 0, 0.5)' // Darker background to focus on the modal
   }}>
     <div style={{
       padding: '20px',
-      background: '#FFF',
+      background: '#FFF', // White background to keep it clean and simple
       borderRadius: '10px',
-      boxShadow: '0 4px 8px rgba(0,0,0,0.5)',
+      boxShadow: '0 4px 8px rgba(0,0,0,0.25)', // Softer shadow for a modern look
       zIndex: 1000,
-      textAlign: 'center'
+      textAlign: 'center', // Ensure text and contents are centered
+      width: '300px' // Fixed width for the modal
     }}>
-      <img src="path/to/your/logo.png" alt="Logo" style={{ width: '100px', marginBottom: '20px' }} />
-      <p>Please log in first.</p>
+      <p style={{
+        fontSize: '12px', // Reduced font size from 24px to 20px for better fitting
+        fontWeight: 'bold', // Bold for emphasis
+        margin: '20px 0' // Sufficient margin around the text
+      }}>
+        Please log in first.
+      </p>
       <button onClick={onClose} style={{
         padding: '10px 20px',
-        backgroundColor: '#BDEF51',
+        backgroundColor: '#BDEF51', // Brand color for consistency
         border: 'none',
-        color: 'white',
+        color: 'black', // Changed font color to black for better visibility
         borderRadius: '5px',
         cursor: 'pointer',
+        fontWeight: 'bold', // Bold for emphasis
+        fontSize: '11px' // Ensuring the button text is also clearly visible
       }}>
         OK
       </button>
     </div>
   </div>
 );
+
 
 const Popup = () => {
   const [currentURL, setCurrentURL] = useState<string>("");
@@ -64,7 +73,7 @@ const Popup = () => {
     setShowLoginModal(false);
   };
 
-  function adjustImageToAspectRatio(imageSrc: string, backgroundColor: string = 'white'): Promise<Blob> {
+  function adjustImageToAspectRatio(imageSrc: string, backgroundColor: string = 'white', scale: number = 0.5): Promise<Blob> {
     return new Promise((resolve, reject) => {
       const img = new Image();
       img.onload = () => {
@@ -75,45 +84,41 @@ const Popup = () => {
           return;
         }
 
-        // Define the target aspect ratio
-        const targetAspectRatio = 4 / 3;
+        // Set the canvas size based on the original image size
+        canvas.width = img.width;
+        canvas.height = img.height;
 
-        let canvasWidth, canvasHeight;
+        // Calculate the scaled dimensions
+        const scaledWidth = img.width * scale;
+        const scaledHeight = img.height * scale;
 
-        // Determine the canvas size to fit the image within the 4:3 ratio without cropping
-        if (img.width / img.height > targetAspectRatio) {
-          // Image is wider
-          canvasWidth = img.width;
-          canvasHeight = canvasWidth / targetAspectRatio;
-          if (canvasHeight < img.height) {
-            canvasHeight = img.height;
-            canvasWidth = canvasHeight * targetAspectRatio;
-          }
-        } else {
-          // Image is taller or perfectly fits the aspect ratio
-          canvasHeight = img.height;
-          canvasWidth = canvasHeight * targetAspectRatio;
-          if (canvasWidth < img.width) {
-            canvasWidth = img.width;
-            canvasHeight = canvasWidth / targetAspectRatio;
-          }
-        }
-
-        canvas.width = canvasWidth;
-        canvas.height = canvasHeight;
-
-        // Calculate position to center the image on the canvas
-        const xOffset = (canvasWidth - img.width) / 2;  // Center the image horizontally
-        const yOffset = (canvasHeight - img.height) / 2; // Center the image vertically
+        // Calculate position to center the scaled image on the original size canvas
+        const xOffset = (canvas.width - scaledWidth) / 2;
+        const yOffset = (canvas.height - scaledHeight) / 2;
 
         // Fill the background
         ctx.fillStyle = backgroundColor;
-        ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // Draw the image in the center of the canvas
-        ctx.drawImage(img, xOffset, yOffset, img.width, img.height);
+        // Draw the image scaled in the center of the canvas
+        ctx.drawImage(img, xOffset, yOffset, scaledWidth, scaledHeight);
 
-        canvas.toBlob(blob => {
+        // Create the final scaled canvas
+        const finalCanvas = document.createElement('canvas');
+        const finalCtx = finalCanvas.getContext('2d');
+        if (!finalCtx) {
+          reject(new Error("Failed to get final 2D context from canvas"));
+          return;
+        }
+
+        // Set final canvas size
+        finalCanvas.width = scaledWidth;
+        finalCanvas.height = scaledHeight;
+
+        // Draw the original canvas content resized
+        finalCtx.drawImage(canvas, 0, 0, scaledWidth, scaledHeight);
+
+        finalCanvas.toBlob(blob => {
           if (blob) {
             resolve(blob);
           } else {
@@ -182,7 +187,7 @@ const Popup = () => {
               body: JSON.stringify({
                 type: 3,
                 mediaUrls: mediaUrls,
-                content: `Has anyone here purchased this ${url} before? I'd love to hear about your experience and how you liked it!`,
+                content: `Has anyone here purchased this before? ${url}  I'd love to hear about your experience and how you liked it!`,
                 title: "Seeking Insights!"
               }),
               headers: {
@@ -200,7 +205,7 @@ const Popup = () => {
         });
       }
     });
-    
+
   };
 
   const handleModalClose = () => {
@@ -218,46 +223,57 @@ const Popup = () => {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: 'rgba(0, 0, 0, 0.4)'
+      backgroundColor: 'rgba(0, 0, 0, 0.4)' // Semi-transparent background to focus attention on modal
     }}>
       <div style={{
         padding: '20px',
-        background: '#FFF',
+        background: '#FFF', // White background for clarity
         borderRadius: '10px',
-        boxShadow: '0 4px 8px rgba(0,0,0,0.5)',
+        boxShadow: '0 4px 8px rgba(0,0,0,0.5)', // Shadow for depth
         zIndex: 1000,
+        textAlign: 'center', // Center-align all text within the modal
       }}>
-        <p>Post shared successfully!</p>
+        <p style={{
+          margin: '0 0 20px 0', // Adjusted margin for better spacing
+          fontSize: '12px', // Optional font size adjustment for better legibility
+          fontWeight: 'bold', // Bold text for emphasis
+        }}>
+          Post shared successfully!
+        </p>
         <button onClick={onClose} style={{
           padding: '10px 20px',
-          backgroundColor: '#BDEF51',
+          backgroundColor: '#BDEF51', // Brand color
           border: 'none',
-          color: 'white',
+          color: 'black', // Changed text color to black for visibility
           borderRadius: '5px',
           cursor: 'pointer',
+          fontWeight: 'bold', // Bold font for button text
+          fontSize: '11px' // Ensuring the button text is also clearly visible
         }}>
           Close
         </button>
       </div>
     </div>
   );
+
   return (
     <>
       <button
         onClick={() => requestReview(currentURL)}
         style={{
-          backgroundColor: "#BDEF51", // Assuming this is your shade of green
-          color: "#000000", // Black color for the text
+          backgroundColor: "#BDEF51",
+          color: "#000000",
           margin: "10px",
-          padding: "10px 20px", // Standard padding, adjust as necessary
-          border: "none", // No border
-          borderRadius: "20px", // Increased border radius for a more rounded appearance
-          cursor: "pointer", // Cursor changes to a pointer when hovering over the button
-          fontSize: "16px", // Font size, adjust as necessary
-          fontWeight: "bold" // Bold text
+          padding: "10px 20px",
+          border: "none",
+          borderRadius: "20px",
+          cursor: "pointer",
+          fontSize: "16px",
+          fontWeight: "bold",
+          boxShadow: '0 2px 4px rgba(0,0,0,0.2)'  // Subtle shadow for depth
         }}
       >
-        Request Review
+        Ask the Community
       </button>
       {isModalOpen && <Modal onClose={handleModalClose} />}
       {showLoginModal && <LoginModal onClose={handleCloseLoginModal} />}
